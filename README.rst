@@ -51,6 +51,18 @@ utilities; it just helps you easily embed the templates in your HTML. Include
 `ICanHaz.js`_ in your project's static assets and use it in your JS as usual.
 
 
+Regular Expressions in Template Tags
+------------------------------------
+
+Using the template tag ``{% icanhaz [directory] [regex] %}`` in your
+Django templates will embed all files matching that regex in the given
+directory.  So, ``{% icanhaz './' '.*_template' %}`` would match
+`note_template.html` and `comment_template.html`, giving them templatename
+`note_template` and `comment_template`, respectively.  (Note that the ".html"
+extension is assumed.  See the advanced usage section for how to customize
+this behavior).
+
+
 Advanced usage
 --------------
 
@@ -60,10 +72,17 @@ each app in ``INSTALLED_APPS``. The app subdirectory name(s) to check can be
 configured via the ``ICANHAZ_APP_DIRNAMES`` setting, which defaults to
 ``["jstemplates"]``.
 
-The finding of templates can be fully controlled via the ``ICANHAZ_FINDERS``
+Standard finding of templates can be fully controlled via the ``ICANHAZ_FINDERS``
 setting, which is a list of dotted paths to finder classes. A finder class
 should be instantiable with no arguments, and have a ``find(name)`` method
 which returns the full absolute path to a template file, given a base-name.
+
+Regex finding of templates can be fully controlled via the
+``ICANHAZ_REGEX_FINDERS`` setting.  A regex finder class should be
+instantiable with no arguments and have a ``find(dir, regex)`` method
+which takes in two strings (directory and regex) and returns a list of
+matches in the form `[(name, filepath)...]` where name is the id given
+to a template and filepath is a full absolute path to a template file.
 
 By default, ``ICANHAZ_FINDERS`` contains ``"icanhaz.finders.FilesystemFinder"``
 (which searches directories listed in ``ICANHAZ_DIRS``) and
@@ -71,6 +90,20 @@ By default, ``ICANHAZ_FINDERS`` contains ``"icanhaz.finders.FilesystemFinder"``
 ``ICANHAZ_APP_DIRNAMES`` of each app in ``INSTALLED_APPS``), in that order --
 thus templates found in ``ICANHAZ_DIRS`` take precedence over templates in
 apps.
+
+By default, ``ICANHAZ_REGEX_FINDERS`` contains
+``"icanhaz.finders.FilesystemRegexFinder"` (which searches directories listed
+in ``ICANHAZ_DIRS``) and ``"icanhaz.finders.AppRegexFinder"`` (which searches
+subdirectories named in ``ICANHAZ_APP_DIRNAMES`` of each app in
+``INSTALLED_APPS``).  Precedence is unimportant, as all matching templates
+are added.  Further, django-icanhaz is bundled with two convenience scoping
+regex finders: ``icanhaz.finders.ScopedFilesystemRegexFinder`` and
+``icanhaz.finders.ScopedAppRegexFinder`` which each prepend a scope derived
+from the directory path given to each name: so, if
+``{% icanhaz './all/my/templates/' '.*_template' %}` matches
+`note_template.html` and `comment_template.html`, they will have names
+`all_my_templates_note_template` and `all_my_templates_comment_template`,
+respectively.
 
 
 Rationale
