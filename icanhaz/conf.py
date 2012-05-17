@@ -22,6 +22,10 @@ conf = Configuration(
         "icanhaz.finders.FilesystemFinder",
         "icanhaz.finders.AppFinder",
         ],
+    ICANHAZ_REGEX_FINDERS=[
+        "icanhaz.finders.FilesystemRegexFinder",
+        "icanhaz.finders.AppRegexFinder",
+        ],
     ICANHAZ_DIRS=[],
     ICANHAZ_APP_DIRNAMES=["jstemplates"],
     )

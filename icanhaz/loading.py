@@ -15,9 +15,19 @@ def find(name):
 
 
 
-def _get_finders():
+def findAll(dir, regex):
+    result = []
+    for finder in regexfinders:
+        paths = finder.findAll(dir, regex)
+        if paths is not None:
+            result += paths
+    return result
+
+
+
+def _get_finders(finder_conf):
     ret = []
-    for finder_path in conf.ICANHAZ_FINDERS:
+    for finder_path in finder_conf:
         modpath, cls_name = finder_path.rsplit(".", 1)
         try:
             mod = import_module(modpath)
@@ -38,7 +48,8 @@ def _get_finders():
 
 
 # Instantiate finders
-finders = _get_finders()
+finders = _get_finders(conf.ICANHAZ_FINDERS)
+regexfinders = _get_finders(conf.ICANHAZ_REGEX_FINDERS)
 
 
 
