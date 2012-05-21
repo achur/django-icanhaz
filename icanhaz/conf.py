@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
 
-
 class Configuration(object):
     def __init__(self, **kwargs):
         self.defaults = kwargs
@@ -28,4 +27,5 @@ conf = Configuration(
         ],
     ICANHAZ_DIRS=[],
     ICANHAZ_APP_DIRNAMES=["jstemplates"],
+    ICANHAZ_IGNORE_HIDDEN_FILES=True
     )
