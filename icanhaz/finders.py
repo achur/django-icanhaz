@@ -6,11 +6,9 @@ from django.utils.importlib import import_module
 from .conf import conf
 
 
-
 class BaseFinder(object):
     def find(self, name):
         raise NotImplementedError()
-
 
 
 class BaseRegexFinder(object):
@@ -20,13 +18,10 @@ class BaseRegexFinder(object):
         raise NotImplementedError()
 
 
-
-
 class FilesystemFinder(BaseFinder):
     @property
     def directories(self):
         return conf.ICANHAZ_DIRS
-
 
     def find(self, name):
         for directory in self.directories:
@@ -40,12 +35,10 @@ class FilesystemFinder(BaseFinder):
         return None
 
 
-
 class FilesystemRegexFinder(BaseRegexFinder):
     @property
     def directories(self):
         return conf.ICANHAZ_DIRS
-
 
     def findAll(self, dir, regex):
         result = []
@@ -53,15 +46,15 @@ class FilesystemRegexFinder(BaseRegexFinder):
         regex = re.compile("(" + regex + ").html")
         for directory in self.directories:
             dirpath = os.path.abspath(os.path.join(directory, dir))
-            for file in os.listdir(dirpath):
-                if not os.path.isdir(file):
-                    match = regex.match(file)
+            for fn in os.listdir(dirpath):
+                if conf.ICANHAZ_IGNORE_HIDDEN_FILES and fn.startswith('.'):
+                    continue
+                if not os.path.isdir(fn):
+                    match = regex.match(fn)
                     if match is not None:
-                        print match.groups()[0]
-                        result += [(match.groups()[0], os.path.join(dirpath, file))]
+                        result += [(match.groups()[0], os.path.join(dirpath, fn))]
 
         return result
-
 
 
 # Convenience subclass to add directory scope to
@@ -72,7 +65,6 @@ class ScopedFilesystemRegexFinder(FilesystemRegexFinder):
         dir = str(os.path.join(dir))
         scope_list = [x for x in dir.split("/") if x is not "." and len(x) > 0]
         return [("_".join(scope_list + [name]), dir) for (name, dir) in res]
-
 
 
 def _get_app_template_dirs():
@@ -91,10 +83,8 @@ def _get_app_template_dirs():
     return ret
 
 
-
 # At import time, cache the app directories to search.
 app_template_dirs = _get_app_template_dirs()
-
 
 
 class AppFinder(FilesystemFinder):
@@ -103,12 +93,10 @@ class AppFinder(FilesystemFinder):
         return app_template_dirs
 
 
-
 class AppRegexFinder(FilesystemRegexFinder):
     @property
     def directories(self):
         return app_template_dirs
-
 
 
 class ScopedAppRegexFinder(ScopedFilesystemRegexFinder):
